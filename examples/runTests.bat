@@ -1,0 +1,14 @@
+java -cp ..\target\org.reldb.relang.relang-0.0.1-SNAPSHOT.jar;"..\target\lib\*" Relang < test01.rl
+java -cp ..\target\org.reldb.relang.relang-0.0.1-SNAPSHOT.jar;"..\target\lib\*" Relang < test02.rl
+java -cp ..\target\org.reldb.relang.relang-0.0.1-SNAPSHOT.jar;"..\target\lib\*" Relang < test03.rl
+java -cp ..\target\org.reldb.relang.relang-0.0.1-SNAPSHOT.jar;"..\target\lib\*" Relang < test04.rl
+java -cp ..\target\org.reldb.relang.relang-0.0.1-SNAPSHOT.jar;"..\target\lib\*" Relang < test05.rl
+java -cp ..\target\org.reldb.relang.relang-0.0.1-SNAPSHOT.jar;"..\target\lib\*" Relang < test06.rl
+java -cp ..\target\org.reldb.relang.relang-0.0.1-SNAPSHOT.jar;"..\target\lib\*" Relang < test07.rl
+java -cp ..\target\org.reldb.relang.relang-0.0.1-SNAPSHOT.jar;"..\target\lib\*" Relang < test08.rl
+java -cp ..\target\org.reldb.relang.relang-0.0.1-SNAPSHOT.jar;"..\target\lib\*" Relang < test09.rl
+java -cp ..\target\org.reldb.relang.relang-0.0.1-SNAPSHOT.jar;"..\target\lib\*" Relang < test10.rl
+java -cp ..\target\org.reldb.relang.relang-0.0.1-SNAPSHOT.jar;"..\target\lib\*" Relang < test11.rl
+java -cp ..\target\org.reldb.relang.relang-0.0.1-SNAPSHOT.jar;"..\target\lib\*" Relang < test12.rl
+java -cp ..\target\org.reldb.relang.relang-0.0.1-SNAPSHOT.jar;"..\target\lib\*" Relang < test13.rl
+java -cp ..\target\org.reldb.relang.relang-0.0.1-SNAPSHOT.jar;"..\target\lib\*" Relang < test14.rl

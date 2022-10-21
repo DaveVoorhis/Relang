@@ -241,10 +241,16 @@ void block() #Block :
 					"{" ( statement() )* "}"
 }
 
+void parameter() #Parameter :
+{}
+{
+                    identifier() identifier()
+}
+
 void parmlist() #Parmlist :
 {}
 {
-					"(" [ identifier() ( "," identifier() )* ] ")"
+					"(" [ parameter() ( "," parameter() )* ] ")"
 }
 
 void fnbody() #FnBody :

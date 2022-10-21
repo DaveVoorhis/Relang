@@ -1,4 +1,4 @@
-fn fib(n) {
+fn fib(long n) {
    if (n == 0 or n == 1) {
       r = n
    } else {

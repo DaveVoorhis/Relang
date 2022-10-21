@@ -20,7 +20,7 @@ class OperatorDefinition {
 	private final Map<String, Slot> slots = new HashMap<>();
 	private final Vector<Parameter> parameters = new Vector<>();
 
-	private boolean hasReturn = false;
+	private Value returnValue;
 	private String bodySource = "";
 	
 	private String getParmDecls() {
@@ -29,7 +29,8 @@ class OperatorDefinition {
 		var parmlist =
 				Stream.concat(
 						Stream.of(firstParameter), 
-						parameters.stream().map(parm -> "Value " + parm.getName()))
+						parameters.stream()
+								.map(parm -> parm.getTypeName() + " " + parm.getExpression()))
 				.collect(Collectors.joining(", "));
 		return "(" + parmlist + ")";
 	}
@@ -54,11 +55,11 @@ class OperatorDefinition {
 			ctorParmDef.append(parent.getSignature()).append("_closure __closure");
 		}
 		for (var slot: slots.values()) {
-			vardefs.append("\tValue ").append(slot.getName()).append(";\n");
-			ctorBody.append("\tthis.").append(slot.getName()).append(" = ").append(slot.getName()).append(";\n");
+			vardefs.append("\t").append(slot.getTypeName()).append(" ").append(slot.getExpression()).append(";\n");
+			ctorBody.append("\tthis.").append(slot.getExpression()).append(" = ").append(slot.getExpression()).append(";\n");
 			if (ctorParmDef.length() > 0)
 				ctorParmDef.append(", ");
-			ctorParmDef.append("Value ").append(slot.getName());
+			ctorParmDef.append(slot.getTypeName()).append(" ").append(slot.getExpression());
 		}
 		var closureClassName = getClosureClassName();
 		return "static class " + closureClassName + " {\n" + 
@@ -70,8 +71,10 @@ class OperatorDefinition {
 	private String getClosureConstruction() {
 		var slotNames =
 				Stream.concat(
-						Stream.of("__closure").filter(p -> parent != null), 
-						slots.values().stream().map(Slot::getName))
+						Stream.of("__closure")
+								.filter(p -> parent != null),
+						slots.values().stream()
+								.map(Slot::getExpression))
 				.collect(Collectors.joining(", "));
 		return "new " + getClosureClassName() + "(" + slotNames + ")";
 	}
@@ -79,7 +82,7 @@ class OperatorDefinition {
 	private String getVarDefs() {
 		return slots.values().stream()
 				.filter(slot -> slot instanceof Variable)
-				.map(slot -> "Value " + slot.getName() + ";\n")
+				.map(slot -> slot.getTypeName() + " " + slot.getExpression() + ";\n")
 				.collect(Collectors.joining());
 	}
 	
@@ -130,8 +133,8 @@ class OperatorDefinition {
 	}
 
 	/** Identify whether this operator returns a value or not. */
-	void setHasReturn(boolean hasReturn) {
-		this.hasReturn = hasReturn;
+	void setReturn(Value returnValue) {
+		this.returnValue = returnValue;
 	}
 	
 	/** Get parent operator definition.  Null if this is the root operator. */
@@ -140,30 +143,29 @@ class OperatorDefinition {
 	}
 
 	/** Create a variable. */
-	Slot createVariable(String refname) {
+	Slot createVariable(String typeName, String refname) {
 		checkSlotDefined(refname);
-		var variable = new Variable(refname);
+		var variable = new Variable(typeName, refname);
 		slots.put(refname, variable);
 		return variable;
 	}
 
 	/** Add a parameter */
-	Slot addParameter(String refname) {
-		checkSlotDefined(refname);
-		var parameter = new Parameter(refname);
-		slots.put(refname, parameter);
+	void addParameter(Parameter parameter) {
+		var parameterName = parameter.getExpression();
+		checkSlotDefined(parameterName);
+		slots.put(parameterName, parameter);
 		parameters.add(parameter);
-		return parameter;
 	}
 	
 	/** Get variable/parameter dereference Java code given name. */
-	String findReference(String refname) {
+	Slot findReference(String refname) {
 		var outRef = new StringBuilder(refname);
 		var opDef = this;
 		do {
 			Slot slot = opDef.slots.get(refname);
 			if (slot != null)
-				return outRef.toString();
+				return new Slot(slot.getTypeName(), outRef.toString());
 			opDef = opDef.parent;
 			outRef.insert(0, "__closure.");
 		} while (opDef != null);
@@ -171,10 +173,10 @@ class OperatorDefinition {
 	}
 	
 	/** Get function invocation Java code given function name and argument list. */
-	String findInvocation(String fnname, Vector<String> arglist) {
+	Value findInvocation(String fnname, Vector<String> arglist) {
 		OperatorDefinition foundOperator;
 		var opDef = this;
-		int nesting = 0;
+		var nesting = 0;
 		do {
 			foundOperator = opDef.operators.get(fnname);
 			if (foundOperator != null)
@@ -191,7 +193,10 @@ class OperatorDefinition {
 				Stream.of(firstArg),
 				arglist.stream())
 					.collect(Collectors.joining(", "));
-		return fnname + "(" + arglistText + ")";		
+		var returnTypeName = foundOperator.returnValue != null
+				? foundOperator.returnValue.getTypeName()
+				: null;
+		return new Value(returnTypeName,fnname + "(" + arglistText + ")");
 	}
 	
 	/** Add Java source code to this definition. */
@@ -205,7 +210,7 @@ class OperatorDefinition {
 				"\n" +
 			 	getComment() +
 				getClosureDef() +
-			 	"\npublic static " + ((hasReturn) ? "Value " : "void ") + name + getParmDecls() + " {\n" + 
+			 	"\npublic static " + ((returnValue != null) ? returnValue.getTypeName() + " " : "void ") + name + getParmDecls() + " {\n" +
 				indent(getVarDefs() + bodySource) + 
 				"}\n";
 	}

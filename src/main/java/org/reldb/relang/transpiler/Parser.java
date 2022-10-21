@@ -71,15 +71,14 @@ public class Parser implements RelangVisitor {
 		return data;
 	}
 	
-	// Transpile (to Java) a Sili program.
+	// Transpile (to Java) a Relang program.
 	public Object visit(ASTCode node, Object data) {
 		beginOperatorDefinition(generatedCodeMainMethodName, node);
 		var mainOperatorDefinition = currentOperatorDefinition;
 		currentOperatorDefinition.addSource(compileChildren(node, data).toString());
 		endOperatorDefinition();
 		return 
-			"import org.reldb.relang.values.*;\n\n" +
-			"public class " + generatedCodeClassName + " {\n" + 
+			"public class " + generatedCodeClassName + " {\n" +
 			indent(mainOperatorDefinition.getSource()) +
 			"}\n";
 	}
@@ -93,7 +92,7 @@ public class Parser implements RelangVisitor {
 	public Object visit(ASTBlock node, Object data) {
 		return compileChildren(node, data);	
 	}
-	
+
 	// Function definition
 	public Object visit(ASTFnDef node, Object data) {
 		// Child 0 - identifier (fn name)
@@ -105,19 +104,28 @@ public class Parser implements RelangVisitor {
 		currentOperatorDefinition.addSource(compileChild(node, 2, data).toString());
 		// optional Child 3 - return expression
 		if (getChildCount(node) == 4) {
-			currentOperatorDefinition.setHasReturn(true);
-			currentOperatorDefinition.addSource(compileChild(node, 3, null).toString());
+			var c0 = compileChild(node, 3, null);
+			var returnExpression = (Value)c0;
+			currentOperatorDefinition.setReturn(returnExpression);
+			currentOperatorDefinition.addSource(returnExpression.toString());
 		}
 		endOperatorDefinition();
 		return data;
 	}
-	
+
+	// Function definition parameter def: type name
+	public Object visit(ASTParameter node, Object data) {
+		var parameterTypeName = getTokenOfChild(node, 0);
+		var parameterName = getTokenOfChild(node, 1);
+		return new Parameter(parameterTypeName, parameterName);
+	}
+
 	// Function definition parameter list.
 	public Object visit(ASTParmlist node, Object data) {
 		for (var i=0; i<getChildCount(node); i++) {
-			String parameterName = getTokenOfChild(node, i);
-			checkSlotDefined(parameterName, node);
-			currentOperatorDefinition.addParameter(parameterName);
+			var parameter = (Parameter)compileChild(node, i, data);
+			checkSlotDefined(parameter.getExpression(), node);
+			currentOperatorDefinition.addParameter(parameter);
 		}
 		return data;
 	}
@@ -129,7 +137,8 @@ public class Parser implements RelangVisitor {
 	
 	// Function return expression
 	public Object visit(ASTReturnExpression node, Object data) {
-		return "return " + compileChild(node, 0, data) + ";\n";
+		var returnExpression = (Value)compileChild(node, 0, data);
+		return new Value(returnExpression.getTypeName(), "return " + returnExpression + ";\n");
 	}
 	
 	// Function invocation argument list. Return as Vector<String> of argument expression source text.
@@ -141,7 +150,7 @@ public class Parser implements RelangVisitor {
 		return argumentSource;
 	}
 	
-	private String fnInvoke(SimpleNode node) {
+	private Value fnInvoke(SimpleNode node) {
 		// Child 0 - identifier (fn name)
 		var fnname = getTokenOfChild(node, 0);
 		// Child 1 - arglist
@@ -155,7 +164,8 @@ public class Parser implements RelangVisitor {
 	
 	// Function call
 	public Object visit(ASTCall node, Object data) {
-		return fnInvoke(node) + ";\n";
+		var invocation = fnInvoke(node);
+		return new Value(invocation.getTypeName(), invocation.getExpression() + ";\n");
 	}
 	
 	// Function invocation in an expression
@@ -165,7 +175,7 @@ public class Parser implements RelangVisitor {
 
 	// Compile an IF 
 	public Object visit(ASTIfStatement node, Object data) {
-		return "if ((" + compileChild(node, 0, data) + ").booleanValue()) {\n" +
+		return "if (" + compileChild(node, 0, data) + ") {\n" +
 				indent(compileChild(node, 1, data)) +
 				"} " + ((node.ifHasElse) ? "else {\n" + indent(compileChild(node, 2, data)) : "") +
 				"}\n";
@@ -175,7 +185,7 @@ public class Parser implements RelangVisitor {
 	public Object visit(ASTForLoop node, Object data) {
 		return "for (" + 
 				compileChild(node, 0, Boolean.TRUE) + "; " + 
-				"(" + compileChild(node, 1, data) + ").booleanValue(); " +
+				"(" + compileChild(node, 1, data) + "); " +
 				compileChild(node, 2, Boolean.TRUE) + ") {\n" +
 				indent(compileChild(node, 3, data)) +
 				"}\n";
@@ -205,106 +215,131 @@ public class Parser implements RelangVisitor {
 	public Object visit(ASTAssignment node, Object data) {
 		// if data is a true Boolean, do not emit the semicolon because we're the last assignment of a for loop
 		var emitSemicolon = !(data instanceof Boolean && (Boolean) data);
-		var refname = getTokenOfChild(node, 0);
-		if (currentOperatorDefinition.findReference(refname) == null)
-			currentOperatorDefinition.createVariable(refname);
-		var deref = currentOperatorDefinition.findReference(refname);
-		return deref + " = " + compileChild(node, 1, data) + ((emitSemicolon) ? ";\n" : "");
+		var targetName = getTokenOfChild(node, 0);
+		var source = (Value)compileChild(node, 1, data);
+		var target = currentOperatorDefinition.findReference(targetName);
+		if (target == null) {
+			target = currentOperatorDefinition.createVariable(source.getTypeName(), targetName);
+		} else {
+			// TODO verify type of source is compatible with target
+		}
+		return target + " = " + source + ((emitSemicolon) ? ";\n" : "");
 	}
 
 	// OR
 	public Object visit(ASTOr node, Object data) {
-		return "(" + compileChild(node, 0, data) + ").or(" + compileChild(node, 1, data) + ")";
+		return binary(node, data, "||", "boolean");
 	}
 
 	// AND
 	public Object visit(ASTAnd node, Object data) {
-		return "(" + compileChild(node, 0, data) + ").and(" + compileChild(node, 1, data) + ")";
+		return binary(node, data, "&&", "boolean");
 	}
 
 	// ==
 	public Object visit(ASTCompEqual node, Object data) {
-		return "(" + compileChild(node, 0, data) + ").eq(" + compileChild(node, 1, data) + ")";
+		return binary(node, data, "==", "boolean");
 	}
 
 	// !=
 	public Object visit(ASTCompNequal node, Object data) {
-		return "(" + compileChild(node, 0, data) + ").neq(" + compileChild(node, 1, data) + ")";
+		return binary(node, data, "!=", "boolean");
 	}
 
 	// >=
 	public Object visit(ASTCompGTE node, Object data) {
-		return "(" + compileChild(node, 0, data) + ").gte(" + compileChild(node, 1, data) + ")";
+		return binary(node, data, ">=", "boolean");
 	}
 
 	// <=
 	public Object visit(ASTCompLTE node, Object data) {
-		return "(" + compileChild(node, 0, data) + ").lte(" + compileChild(node, 1, data) + ")";
+		return binary(node, data, "<=", "boolean");
 	}
 
 	// >
 	public Object visit(ASTCompGT node, Object data) {
-		return "(" + compileChild(node, 0, data) + ").gt(" + compileChild(node, 1, data) + ")";
+		return binary(node, data, ">", "boolean");
 	}
 
 	// <
 	public Object visit(ASTCompLT node, Object data) {
-		return "(" + compileChild(node, 0, data) + ").lt(" + compileChild(node, 1, data) + ")";
+		return binary(node, data, "<", "boolean");
 	}
 
 	// +
 	public Object visit(ASTAdd node, Object data) {
-		return "(" + compileChild(node, 0, data) + ").add(" + compileChild(node, 1, data) + ")";
+		return binary(node, data, "+");
 	}
 
 	// -
 	public Object visit(ASTSubtract node, Object data) {
-		return "(" + compileChild(node, 0, data) + ").subtract(" + compileChild(node, 1, data) + ")";
+		return binary(node, data, "-");
 	}
 
 	// *
 	public Object visit(ASTTimes node, Object data) {
-		return "(" + compileChild(node, 0, data) + ").mult(" + compileChild(node, 1, data) + ")";
+		return binary(node, data, "*");
 	}
 
 	// /
 	public Object visit(ASTDivide node, Object data) {
-		return "(" + compileChild(node, 0, data) + ").div(" + compileChild(node, 1, data) + ")";
+		return binary(node, data, "/");
+	}
+
+	private Value binary(SimpleNode node, Object data, String operator) {
+		var c0 = compileChild(node, 0, data);
+		var c1 = compileChild(node, 1, data);
+		var operand0 = (Value)c0;
+		var operand1 = (Value)c1;
+		var type = operand0.getTypeName();
+		return new Value(type, "(" + operand0 + ") " + operator + " (" + operand1 + ")");
+	}
+
+	private Value binary(SimpleNode node, Object data, String operator, String type) {
+		var c0 = compileChild(node, 0, data);
+		var c1 = compileChild(node, 1, data);
+		var operand0 = (Value)c0;
+		var operand1 = (Value)c1;
+		return new Value(type, "(" + operand0 + ") " + operator + " (" + operand1 + ")");
 	}
 
 	// NOT
 	public Object visit(ASTUnaryNot node, Object data) {
-		return "(" + compileChild(node, 0, data) + ").not()";
+		return unary(node, data, "!");
 	}
 
 	// + (unary)
 	public Object visit(ASTUnaryPlus node, Object data) {
-		return "(" + compileChild(node, 0, data) + ").unary_plus()";
+		return unary(node, data, "+");
 	}
 
 	// - (unary)
 	public Object visit(ASTUnaryMinus node, Object data) {
-		return "(" + compileChild(node, 0, data) + ").unary_minus()";
+		return unary(node, data, "-");
 	}
 
-	// Push integer literal to stack
+	private Value unary(SimpleNode node, Object data, String operator) {
+		var operand = (Value)compileChild(node, 0, data);
+		return new Value(operand.getTypeName(), operator + "(" + operand + ")");
+	}
+
+	// integer literal
 	public Object visit(ASTInteger node, Object data) {
-		return "new ValueInteger(" + Integer.parseInt(node.tokenValue) + ")";
+		return new Value("long", node.tokenValue);
 	}
 
 	// floating point literal
 	public Object visit(ASTRational node, Object data) {
-		return "new ValueRational(" + Double.parseDouble(node.tokenValue) + ")";
+		return new Value("double", node.tokenValue);
 	}
 
 	// true literal
 	public Object visit(ASTTrue node, Object data) {
-		return "ValueBoolean.getTrue()";
+		return new Value("boolean", "true");
 	}
 
 	// false literal
 	public Object visit(ASTFalse node, Object data) {
-		return "ValueBoolean.getFalse()";
+		return new Value("boolean", "false");
 	}
-
 }

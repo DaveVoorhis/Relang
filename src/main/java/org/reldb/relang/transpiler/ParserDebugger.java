@@ -16,7 +16,7 @@ public class ParserDebugger implements RelangVisitor {
 		++indent;
 		data = node.childrenAccept(this, data);
 		--indent;
-		return data;		
+		return data;
 	}
 	
 	public Object visit(SimpleNode node, Object data) {
@@ -26,214 +26,184 @@ public class ParserDebugger implements RelangVisitor {
 	
 	// Execute a program
 	public Object visit(ASTCode node, Object data) {
-		dump(node, data);
-		return data;
+		return dump(node, data);
 	}
 	
 	// Execute a statement
 	public Object visit(ASTStatement node, Object data) {
-		dump(node, data);
-		return data;
+		return dump(node, data);
 	}
 
 	// Execute a block
 	public Object visit(ASTBlock node, Object data) {
-		dump(node, data);
-		return data;	
+		return dump(node, data);
 	}
 
 	// Execute an IF 
 	public Object visit(ASTIfStatement node, Object data) {
-		dump(node, data);
-		return data;
+		return dump(node, data);
+	}
+
+	// Function definition parameter def -- type name pair
+	public Object visit(ASTParameter node, Object data) {
+		return dump(node, data);
 	}
 	
 	// Function definition parameter list
 	public Object visit(ASTParmlist node, Object data) {
-		dump(node, data);
-		return data;
+		return dump(node, data);
 	}
 	
 	// Function body
 	public Object visit(ASTFnBody node, Object data) {
-		dump(node, data);
-		return data;
+		return dump(node, data);
 	}
 	
 	// Function return expression
 	public Object visit(ASTReturnExpression node, Object data) {
-		dump(node, data);
-		return data;
+		return dump(node, data);
 	}
 	
 	// Function definition
 	public Object visit(ASTFnDef node, Object data) {
-		dump(node, data);
-		return data;
+		return dump(node, data);
 	}
 	
 	// Function argument list
 	public Object visit(ASTArgList node, Object data) {
-		dump(node, data);
-		return data;
+		return dump(node, data);
 	}
 	
 	// Function call
 	public Object visit(ASTCall node, Object data) {
-		dump(node, data);
-		return data;
+		return dump(node, data);
 	}
 	
 	// Function invocation in an expression
 	public Object visit(ASTFnInvoke node, Object data) {
-		dump(node, data);
-		return data;
+		return dump(node, data);
 	}
 	
 	// Dereference a variable, and push its value onto the stack
 	public Object visit(ASTDereference node, Object data) {
-		dump(node, data);
-		return data;
+		return dump(node, data);
 	}
 	
 	// Execute a FOR loop
 	public Object visit(ASTForLoop node, Object data) {
-		dump(node, data);
-		return data;
+		return dump(node, data);
 	}
 	
 	// Process an identifier
 	// This doesn't do anything, but needs to be here because we need an ASTIdentifier node.
 	public Object visit(ASTIdentifier node, Object data) {
-		dump(node, data);
-		return data;
+		return dump(node, data);
 	}
 	
 	// Execute the WRITE statement
 	public Object visit(ASTWrite node, Object data) {
-		dump(node, data);
-		return data;
+		return dump(node, data);
 	}
 	
 	// Execute an assignment statement, by popping a value off the stack and assigning it
 	// to a variable.
 	public Object visit(ASTAssignment node, Object data) {
-		dump(node, data);
-		return data;
+		return dump(node, data);
 	}
 
 	// OR
 	public Object visit(ASTOr node, Object data) {
-		dump(node, data);
-		return data;
+		return dump(node, data);
 	}
 
 	// AND
 	public Object visit(ASTAnd node, Object data) {
-		dump(node, data);
-		return data;		
+		return dump(node, data);
 	}
 
 	// ==
 	public Object visit(ASTCompEqual node, Object data) {
-		dump(node, data);
-		return data;
+		return dump(node, data);
 	}
 
 	// !=
 	public Object visit(ASTCompNequal node, Object data) {
-		dump(node, data);
-		return data;
+		return dump(node, data);
 	}
 
 	// >=
 	public Object visit(ASTCompGTE node, Object data) {
-		dump(node, data);
-		return data;
+		return dump(node, data);
 	}
 
 	// <=
 	public Object visit(ASTCompLTE node, Object data) {
-		dump(node, data);
-		return data;
+		return dump(node, data);
 	}
 
 	// >
 	public Object visit(ASTCompGT node, Object data) {
-		dump(node, data);
-		return data;
+		return dump(node, data);
 	}
 
 	// <
 	public Object visit(ASTCompLT node, Object data) {
-		dump(node, data);
-		return data;
+		return dump(node, data);
 	}
 
 	// +
 	public Object visit(ASTAdd node, Object data) {
-		dump(node, data);
-		return data;
+		return dump(node, data);
 	}
 
 	// -
 	public Object visit(ASTSubtract node, Object data) {
-		dump(node, data);
-		return data;
+		return dump(node, data);
 	}
 
 	// *
 	public Object visit(ASTTimes node, Object data) {
-		dump(node, data);
-		return data;
+		return dump(node, data);
 	}
 
 	// /
 	public Object visit(ASTDivide node, Object data) {
-		dump(node, data);
-		return data;
+		return dump(node, data);
 	}
 
 	// NOT
 	public Object visit(ASTUnaryNot node, Object data) {
-		dump(node, data);
-		return data;
+		return dump(node, data);
 	}
 
 	// + (unary)
 	public Object visit(ASTUnaryPlus node, Object data) {
-		dump(node, data);
-		return data;
+		return dump(node, data);
 	}
 
 	// - (unary)
 	public Object visit(ASTUnaryMinus node, Object data) {
-		dump(node, data);
-		return data;
+		return dump(node, data);
 	}
 
 	// Push integer literal to stack
 	public Object visit(ASTInteger node, Object data) {
-		dump(node, data);
-		return data;
+		return dump(node, data);
 	}
 
 	// Push floating point literal to stack
 	public Object visit(ASTRational node, Object data) {
-		dump(node, data);
-		return data;
+		return dump(node, data);
 	}
 
 	// Push true literal to stack
 	public Object visit(ASTTrue node, Object data) {
-		dump(node, data);
-		return data;
+		return dump(node, data);
 	}
 
 	// Push false literal to stack
 	public Object visit(ASTFalse node, Object data) {
-		dump(node, data);
-		return data;
+		return dump(node, data);
 	}
 
 }

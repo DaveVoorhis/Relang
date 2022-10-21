@@ -1,8 +1,8 @@
-fn sum(n) {
+fn sum(long n) {
    if (n > 0)
       	p = n + sum(n - 1)
    else
-	p = 0
+	    p = 0
    return p
 }
 

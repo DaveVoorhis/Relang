@@ -69,7 +69,7 @@
                             <goal>jjtree-javacc</goal>
                         </goals>
                         <configuration>
-                            <sourceDirectory>${basedir}/src/main/java/org/reldb/relang/parser</sourceDirectory>
+                            <sourceDirectory>${basedir}/src/main/java/org/reldb/relang/grammar</sourceDirectory>
                         </configuration>
                     </execution>
                 </executions>
@@ -81,7 +81,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>Silt</mainClass>
+                            <mainClass>Relang</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

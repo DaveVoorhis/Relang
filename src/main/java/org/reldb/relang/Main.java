@@ -1,13 +1,15 @@
-package org.reldb.relang.transpiler;
+package org.reldb.relang;
 
 import org.reldb.relang.exceptions.ExceptionSemantic;
 import org.reldb.relang.java.DirClassLoader;
 import org.reldb.relang.java.ForeignCompilerJava;
 import org.reldb.relang.parser.ast.*;
+import org.reldb.relang.transpiler.Parser;
+import org.reldb.relang.transpiler.ParserDebugger;
 
 import static org.reldb.relang.transpiler.Formatter.indent;
 
-public class Transpiler {
+public class Main {
 	
 	private static void usage() {
 		System.out.println("Usage: relang [-d0 | -d1] < <source>");
@@ -41,6 +43,9 @@ public class Transpiler {
 			}
 			// Run the input stream through the translator to get translated code.
 			var code = (String)parser.jjtAccept(nodeVisitor, null);
+			if (debugAST) {
+				return;
+			}
 			// Dump if debugging
 			if (debugOnRun) {
 				System.out.println("Compiled:");

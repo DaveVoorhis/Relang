@@ -1,16 +1,16 @@
 z = 2
 
-fn zaz(a) {
+fn zaz(long a) {
    return a
 }
 
-fn blah(p) {
+fn blah(long p) {
    q = 3
-   fn zot(r) {
+   fn zot(long r) {
       return zaz(r + p + q + z)
    }
 
-   fn zog(n) {
+   fn zog(long n) {
       return zot(n + 2)
    }
 

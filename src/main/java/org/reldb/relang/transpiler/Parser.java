@@ -104,8 +104,7 @@ public class Parser implements RelangVisitor {
 		currentOperatorDefinition.addSource(compileChild(node, 2, data).toString());
 		// optional Child 3 - return expression
 		if (getChildCount(node) == 4) {
-			var c0 = compileChild(node, 3, null);
-			var returnExpression = (Value)c0;
+			var returnExpression = (Value)compileChild(node, 3, null);
 			currentOperatorDefinition.setReturn(returnExpression);
 			currentOperatorDefinition.addSource(returnExpression.toString());
 		}
@@ -287,19 +286,15 @@ public class Parser implements RelangVisitor {
 	}
 
 	private Value binary(SimpleNode node, Object data, String operator) {
-		var c0 = compileChild(node, 0, data);
-		var c1 = compileChild(node, 1, data);
-		var operand0 = (Value)c0;
-		var operand1 = (Value)c1;
+		var operand0 = (Value)compileChild(node, 0, data);
+		var operand1 = (Value)compileChild(node, 1, data);
 		var type = operand0.getTypeName();
 		return new Value(type, "(" + operand0 + ") " + operator + " (" + operand1 + ")");
 	}
 
 	private Value binary(SimpleNode node, Object data, String operator, String type) {
-		var c0 = compileChild(node, 0, data);
-		var c1 = compileChild(node, 1, data);
-		var operand0 = (Value)c0;
-		var operand1 = (Value)c1;
+		var operand0 = (Value)compileChild(node, 0, data);
+		var operand1 = (Value)compileChild(node, 1, data);
 		return new Value(type, "(" + operand0 + ") " + operator + " (" + operand1 + ")");
 	}
 

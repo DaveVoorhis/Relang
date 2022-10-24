@@ -3,7 +3,7 @@ p = 3
 blah(long start, long fin) -> {
 
 	zot(long x, long y) -> {
-	   	zaz(long r) -> return p + x * r
+	   	zaz(long r) -> p + x * r
 
 		return x * y + zaz(y)
 	}

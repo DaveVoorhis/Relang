@@ -262,7 +262,7 @@ void fnbody() #FnBody :
 void fndefPure() #FnDefPure :
 {}
 {
-                    identifier() parmlist() <FNDEF> <RETURN> returnexpr()
+                    identifier() parmlist() <FNDEF> returnexpr()
 }
 
 void fndefImpure() #FnDef :

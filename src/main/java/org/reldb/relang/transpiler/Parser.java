@@ -93,7 +93,22 @@ public class Parser implements RelangVisitor {
 		return compileChildren(node, data);	
 	}
 
-	// Function definition
+	// Function definition (pure)
+	public Object visit(ASTFnDefPure node, Object data) {
+		// Child 0 - identifier (fn name)
+		var fnname = getTokenOfChild(node, 0);
+		beginOperatorDefinition(fnname, node);
+		// Child 1 - function definition parameter list
+		compileChild(node, 1, data);
+		// Child 2 - return expression
+		var returnExpression = (Value)compileChild(node, 2, null);
+		currentOperatorDefinition.setReturn(returnExpression);
+		currentOperatorDefinition.addSource(returnExpression.toString());
+		endOperatorDefinition();
+		return data;
+	}
+
+	// Function definition (impure)
 	public Object visit(ASTFnDef node, Object data) {
 		// Child 0 - identifier (fn name)
 		var fnname = getTokenOfChild(node, 0);

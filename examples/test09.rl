@@ -1,6 +1,6 @@
 p = 3
 
-fn blah(long start, long fin) {
+blah(long start, long fin) -> {
 	for (i=start; i<=fin; i=i+1)
 		write i
 	write p + 2

@@ -1,4 +1,4 @@
-fn sum(long n) {
+sum(long n) -> {
    if (n > 0)
       	p = n + sum(n - 1)
    else

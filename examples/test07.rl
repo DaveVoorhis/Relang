@@ -1,6 +1,6 @@
 p5 = 10
 
-fn test(long p1, long p2, long p3) {
+test(long p1, long p2, long p3) -> {
 	write p1
 	write p2
 	write p3

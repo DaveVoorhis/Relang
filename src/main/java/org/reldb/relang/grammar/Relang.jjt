@@ -75,7 +75,6 @@ TOKEN [IGNORE_CASE] : /* RESERVED WORDS AND LITERALS */
 | < ELSE: "ELSE" >
 | < FOR: "FOR" >
 | < WRITE: "WRITE" >
-| < FN: "FN" >
 | < RETURN: "RETURN" >
 | < OR: "OR" >
 | < AND: "AND" >
@@ -211,6 +210,7 @@ TOKEN : /* OPERATOR SYMBOLS */
 | < STAR: "*" >
 | < SLASH: "/" >
 | < REM: "%" >
+| < FNDEF: "->" >
 }
 
 /***********************************************
@@ -227,7 +227,7 @@ void statement() #Statement :
 {}
 {
 				 	LOOKAHEAD(2) assignment()
-				|	fndef()
+				|	LOOKAHEAD(fndef()) fndef()
 				|	block()
 				|	ifstatement()
 				|	forloop()
@@ -259,13 +259,26 @@ void fnbody() #FnBody :
 					( statement() )*
 }
 
-void fndef() #FnDef :
+void fndefPure() #FnDefPure :
 {}
 {
-					<FN> identifier() parmlist() "{"
+                    identifier() parmlist() <FNDEF> <RETURN> returnexpr()
+}
+
+void fndefImpure() #FnDef :
+{}
+{
+					identifier() parmlist() <FNDEF> "{"
 						fnbody()
 						[ <RETURN> returnexpr() ]
 					"}"
+}
+
+void fndef() :
+{}
+{
+      LOOKAHEAD(fndefPure()) fndefPure()
+    | fndefImpure()
 }
 
 void returnexpr() #ReturnExpression :

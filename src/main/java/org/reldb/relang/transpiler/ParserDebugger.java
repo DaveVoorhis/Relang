@@ -58,13 +58,18 @@ public class ParserDebugger implements RelangVisitor {
 	public Object visit(ASTFnBody node, Object data) {
 		return dump(node, data);
 	}
-	
+
 	// Function return expression
 	public Object visit(ASTReturnExpression node, Object data) {
 		return dump(node, data);
 	}
-	
-	// Function definition
+
+	// Function definition (pure)
+	public Object visit(ASTFnDefPure node, Object data) {
+		return dump(node, data);
+	}
+
+	// Function definition (impure)
 	public Object visit(ASTFnDef node, Object data) {
 		return dump(node, data);
 	}

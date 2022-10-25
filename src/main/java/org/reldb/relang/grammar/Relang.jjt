@@ -1,5 +1,5 @@
 /*
- * A simple language transpiler.
+ * Relang transpiler.
  *
  */
 
@@ -220,58 +220,58 @@ TOKEN : /* OPERATOR SYMBOLS */
 ASTCode code() #Code :
 {}
 {
-     			      statement() ( statement() )* <EOF>  {return jjtThis;}
+    statement() ( statement() )* <EOF>  {return jjtThis;}
 }
 
 void statement() #Statement :
 {}
 {
-				 	LOOKAHEAD(2) assignment()
-				|	LOOKAHEAD(fndef()) fndef()
-				|	block()
-				|	ifstatement()
-				|	forloop()
-				|	write()
-				|	call()
+      LOOKAHEAD(2) assignment()
+    | LOOKAHEAD(fndef()) fndef()
+    | block()
+    | ifstatement()
+    | forloop()
+    | write()
+    | call()
 }
 
 void block() #Block :
 {}
 {
-					"{" ( statement() )* "}"
+    "{" ( statement() )* "}"
 }
 
 void parameter() #Parameter :
 {}
 {
-                    identifier() identifier()
+    identifier() identifier()
 }
 
 void parmlist() #Parmlist :
 {}
 {
-					"(" [ parameter() ( "," parameter() )* ] ")"
+    "(" [ parameter() ( "," parameter() )* ] ")"
 }
 
 void fnbody() #FnBody :
 {}
 {
-					( statement() )*
+    ( statement() )*
 }
 
 void fndefPure() #FnDefPure :
 {}
 {
-                    identifier() parmlist() <FNDEF> returnexpr()
+    identifier() parmlist() <FNDEF> returnexpr()
 }
 
 void fndefImpure() #FnDef :
 {}
 {
-					identifier() parmlist() <FNDEF> "{"
-						fnbody()
-						[ <RETURN> returnexpr() ]
-					"}"
+    identifier() parmlist() <FNDEF> "{"
+        fnbody()
+        [ <RETURN> returnexpr() ]
+    "}"
 }
 
 void fndef() :
@@ -284,44 +284,44 @@ void fndef() :
 void returnexpr() #ReturnExpression :
 {}
 {
-					expression()
+    expression()
 }
 
 void assignment() :
 {}
 {
-					identifier() "=" expression() #Assignment(2)
+    identifier() "=" expression() #Assignment(2)
 }
 
 void ifstatement() #IfStatement :
 {}
 {
-  					<IF> "(" expression() ")" statement()
-  					[ LOOKAHEAD(1) <ELSE> statement() {jjtThis.ifHasElse = true;} ]
+    <IF> "(" expression() ")" statement()
+    [ LOOKAHEAD(1) <ELSE> statement() {jjtThis.ifHasElse = true;} ]
 }
 
 void forloop() #ForLoop :
 {}
 {
-  					<FOR> "(" assignment() ";" expression() ";" assignment() ")" statement()
+    <FOR> "(" assignment() ";" expression() ";" assignment() ")" statement()
 }
 
 void write() :
 {}
 {
-					<WRITE> expression() #Write(1)
+    <WRITE> expression() #Write(1)
 }
 
 void call() #Call :
 {}
 {
-					identifier() arglist()
+    identifier() arglist()
 }
 
 void arglist() #ArgList :
 {}
 {
-					"(" [ expression() ] ( "," expression() )* ")"
+    "(" [ expression() ] ( "," expression() )* ")"
 }
 
 //
@@ -331,111 +331,111 @@ void arglist() #ArgList :
 void expression() :
 {}
 {
-                  or_expression()
+    or_expression()
 }
 
 void or_expression() :
 {}
 {
-			      and_expression() ( <OR> and_expression() #Or(2) )*
+    and_expression() ( <OR> and_expression() #Or(2) )*
 }
 
 void and_expression() :
 {}
 {
-			      compare_expression() ( <AND> compare_expression() #And(2) )*
+    compare_expression() ( <AND> compare_expression() #And(2) )*
 }
 
 void compare_expression() :
 {}
 {
-                              add_expression() [
-                                 "=="  add_expression() #CompEqual(2)
-                               | "<>" add_expression() #CompNequal(2)
-                               | ">=" add_expression() #CompGTE(2)
-                               | "<=" add_expression() #CompLTE(2)
-                               | ">"  add_expression() #CompGT(2)
-                               | "<"  add_expression() #CompLT(2)
-                               ]
+    add_expression() [
+     "=="  add_expression() #CompEqual(2)
+    | "<>" add_expression() #CompNequal(2)
+    | ">=" add_expression() #CompGTE(2)
+    | "<=" add_expression() #CompLTE(2)
+    | ">"  add_expression() #CompGT(2)
+    | "<"  add_expression() #CompLT(2)
+    ]
 }
 
 void add_expression() :
 {}
 {
-                              mul_expression() (
-                                  "+"  mul_expression() #Add(2)
-                                | "-"  mul_expression() #Subtract(2)
-                              )*
+    mul_expression() (
+      "+"  mul_expression() #Add(2)
+    | "-"  mul_expression() #Subtract(2)
+    )*
 }
 
 void mul_expression() :
 {}
 {
-			      			  unary_expression() (
-                                  "*" unary_expression() #Times(2)
-                                | "/" unary_expression() #Divide(2)
-                              )*
+    unary_expression() (
+      "*" unary_expression() #Times(2)
+    | "/" unary_expression() #Divide(2)
+    )*
 }
 
 void unary_expression() :
 {}
 {
-                              <NOT> unary_expression() #UnaryNot(1)
-                            | "+"   unary_expression() #UnaryPlus(1)
-                            | "-"   unary_expression() #UnaryMinus(1)
-                            | primary_expression()
+      <NOT> unary_expression() #UnaryNot(1)
+    | "+"   unary_expression() #UnaryPlus(1)
+    | "-"   unary_expression() #UnaryMinus(1)
+    | primary_expression()
 }
 
 void primary_expression() :
 {}
 {
-                              literal()
-                            | LOOKAHEAD(2) fn_invoke()
-                            | dereference()
-                            | "(" expression() ")"
+      literal()
+    | LOOKAHEAD(2) fn_invoke()
+    | dereference()
+    | "(" expression() ")"
 }
 
 void fn_invoke() #FnInvoke :
 {}
 {
-							identifier() arglist()
+    identifier() arglist()
 }
 
 void literal() :
 {}
 {
-							  integer()
-							| rational()
-							| bool()
+      integer()
+    | rational()
+    | bool()
 }
 
 void identifier() #Identifier :
 {Token t;}
 {
-	t = <IDENTIFIER> {jjtThis.tokenValue = t.image;}
+    t = <IDENTIFIER> {jjtThis.tokenValue = t.image;}
 }
 
 void dereference() #Dereference :
 {Token t;}
 {
-	t = <IDENTIFIER> {jjtThis.tokenValue = t.image;}
+    t = <IDENTIFIER> {jjtThis.tokenValue = t.image;}
 }
 
 void integer() #Integer :
 {Token t;}
 {
-	t = <INTEGER_LITERAL> {jjtThis.tokenValue = t.image;}
+    t = <INTEGER_LITERAL> {jjtThis.tokenValue = t.image;}
 }
 
 void rational() #Rational :
 {Token t;}
 {
-	t = <FLOATING_POINT_LITERAL> {jjtThis.tokenValue = t.image;}
+    t = <FLOATING_POINT_LITERAL> {jjtThis.tokenValue = t.image;}
 }
 
 void bool() :
 {}
 {
-			      <TRUE> #True
-                | <FALSE> #False
+      <TRUE> #True
+    | <FALSE> #False
 }

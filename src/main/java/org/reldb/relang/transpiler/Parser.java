@@ -8,8 +8,13 @@ import org.reldb.relang.parser.ast.*;
 import static org.reldb.relang.transpiler.Formatter.indent;
 
 public class Parser implements RelangVisitor {
-	public static final String generatedCodeClassName = "RelangGenerated";
 	public static final String generatedCodeMainMethodName = "__main";
+
+	private final String generatedCodeClassName;
+
+	public Parser(String generatedCodeClassName) {
+		this.generatedCodeClassName = generatedCodeClassName;
+	}
 
 	// Reference to current operator definition.
 	private OperatorDefinition currentOperatorDefinition = null;

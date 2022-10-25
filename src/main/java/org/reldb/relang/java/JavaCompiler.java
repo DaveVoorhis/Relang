@@ -15,18 +15,18 @@ import org.eclipse.jdt.core.compiler.CompilationProgress;
 
 import org.reldb.relang.exceptions.ExceptionFatal;
 
-public class ForeignCompilerJava {
+public class JavaCompiler {
 
 	public final static String dataDir = "data";
 
 	private final boolean verbose;
 
-	public ForeignCompilerJava(boolean verbose) {
+	public JavaCompiler(boolean verbose) {
 		this.verbose = verbose;
 	}
 
 	/** Compile foreign code using Eclipse JDT compiler. */
-	public void compileForeignCode(PrintStream stream, String className, String src) {
+	public void compile(String className, String src) {
 		var messageStream = new ByteArrayOutputStream();
 		var warningStream = new ByteArrayOutputStream();
 		var warningSetting = "allDeprecation,"
@@ -99,7 +99,7 @@ public class ForeignCompilerJava {
 
 					@Override
 					public void setTaskName(String arg0) {
-						ForeignCompilerJava.this.notify(arg0);
+						JavaCompiler.this.notify(arg0);
 					}
 
 					@Override

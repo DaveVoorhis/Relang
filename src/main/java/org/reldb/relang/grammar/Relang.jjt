@@ -217,10 +217,16 @@ TOKEN : /* OPERATOR SYMBOLS */
  *          THE GRAMMAR STARTS HERE            *
  ***********************************************/
 
-ASTCode code() #Code :
+ASTExecute execute() #Execute :
 {}
 {
     statement() ( statement() )* <EOF>  {return jjtThis;}
+}
+
+ASTEvaluate evaluate() #Evaluate :
+{}
+{
+    ( statement() )* <RETURN> returnexpr() <EOF> {return jjtThis;}
 }
 
 void statement() #Statement :

@@ -38,6 +38,47 @@ public class Main {
 		debugMode = _debugMode;
 	}
 
+	public Object evaluate(InputStream inputStream)
+			throws InvocationTargetException,
+			IllegalAccessException,
+			NoSuchMethodException,
+			ClassNotFoundException,
+			ParseException {
+		var relang = new Relang(inputStream);
+		var className = getClassName();
+		var parser = debugMode == DebugModes.EMIT_AST_AND_QUIT
+				? new ParserDebugger()
+				: new Parser(className);
+		if (debugMode == DebugModes.VERBOSE_RUN) {
+			System.out.println("Compiling...");
+		}
+		// Run the input stream through the translator to get translated code.
+		var java = (String)relang.evaluate().jjtAccept(parser, null);
+		if (debugMode == DebugModes.EMIT_AST_AND_QUIT) {
+			return null;
+		}
+		// Dump if debugging
+		if (debugMode == DebugModes.VERBOSE_RUN) {
+			System.out.println("Compiled:");
+			System.out.println(indent(java));
+			System.out.println("Executing...");
+		}
+		// compile translated code
+		var compiler = new JavaCompiler(debugMode == DebugModes.VERBOSE_RUN);
+		compiler.compile(className, java);
+		// load and run translated code
+		var classLoader = new DirClassLoader(JavaCompiler.dataDir);
+		var generatedClass = classLoader.forName(className);
+		Object returnValue;
+		try {
+			var mainMethod = generatedClass.getMethod(Parser.generatedCodeMainMethodName, (Class<?>[]) null);
+			returnValue = mainMethod.invoke(null);
+		} finally {
+			classLoader.unload(className);
+		}
+		return returnValue;
+	}
+
 	public void execute(InputStream inputStream)
 			throws InvocationTargetException,
 				IllegalAccessException,
@@ -53,7 +94,7 @@ public class Main {
 			System.out.println("Compiling...");
 		}
 		// Run the input stream through the translator to get translated code.
-		var java = (String)relang.code().jjtAccept(parser, null);
+		var java = (String)relang.execute().jjtAccept(parser, null);
 		if (debugMode == DebugModes.EMIT_AST_AND_QUIT) {
 			return;
 		}

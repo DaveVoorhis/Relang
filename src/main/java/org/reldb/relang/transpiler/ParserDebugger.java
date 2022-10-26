@@ -25,10 +25,16 @@ public class ParserDebugger implements RelangVisitor {
 	}
 	
 	// Execute a program
-	public Object visit(ASTCode node, Object data) {
+	public Object visit(ASTExecute node, Object data) {
 		return dump(node, data);
 	}
-	
+
+	// Evaluate an expression, possibly preceded by arbitrary multiple statements.
+	@Override
+	public Object visit(ASTEvaluate node, Object data) {
+		return dump(node, data);
+	}
+
 	// Execute a statement
 	public Object visit(ASTStatement node, Object data) {
 		return dump(node, data);

@@ -49,16 +49,21 @@ public class Parser implements RelangVisitor {
 	private Object compileChild(SimpleNode node, int childIndex, Object data) {
 		return node.jjtGetChild(childIndex).jjtAccept(this, data);
 	}
-	
-	// Compile all children of the given node, and return the resulting Java source.
-	private Object compileChildren(SimpleNode node, Object data) {
+
+	// Compile n children of the given node, and return the resulting Java source.
+	private Object compileChildren(SimpleNode node, int n, Object data) {
 		var out = new StringBuilder();
-		for (var i = 0; i < getChildCount(node); i++) {
+		for (var i = 0; i < n; i++) {
 			Object compileResult = compileChild(node, i, data);
 			if (compileResult != null)
 				out.append(compileResult);
 		}
 		return out.toString();
+	}
+
+	// Compile all children of the given node, and return the resulting Java source.
+	private Object compileChildren(SimpleNode node, Object data) {
+		return compileChildren(node, getChildCount(node), data);
 	}
 	
 	// Get the ith child as a BaseASTNode
@@ -77,7 +82,7 @@ public class Parser implements RelangVisitor {
 	}
 	
 	// Transpile (to Java) a Relang program.
-	public Object visit(ASTCode node, Object data) {
+	public Object visit(ASTExecute node, Object data) {
 		beginOperatorDefinition(generatedCodeMainMethodName, node);
 		var mainOperatorDefinition = currentOperatorDefinition;
 		currentOperatorDefinition.addSource(compileChildren(node, data).toString());
@@ -87,7 +92,23 @@ public class Parser implements RelangVisitor {
 			indent(mainOperatorDefinition.getSource()) +
 			"}\n";
 	}
-	
+
+	// Transpile (to Java) an expression, possibly preceded by a Relang program.
+	public Object visit(ASTEvaluate node, Object data) {
+		beginOperatorDefinition(generatedCodeMainMethodName, node);
+		var mainOperatorDefinition = currentOperatorDefinition;
+		var nodeCount = getChildCount(node);
+		if (nodeCount > 1) {
+			currentOperatorDefinition.addSource(compileChildren(node, nodeCount - 1, data).toString());
+		}
+		compileChild(node, nodeCount - 1, null);
+		endOperatorDefinition();
+		return
+				"public class " + generatedCodeClassName + " {\n" +
+				indent(mainOperatorDefinition.getSource()) +
+				"}\n";
+	}
+
 	// Compile a statement
 	public Object visit(ASTStatement node, Object data) {
 		return compileChildren(node, data);
@@ -106,9 +127,7 @@ public class Parser implements RelangVisitor {
 		// Child 1 - function definition parameter list
 		compileChild(node, 1, data);
 		// Child 2 - return expression
-		var returnExpression = (Value)compileChild(node, 2, null);
-		currentOperatorDefinition.setReturn(returnExpression);
-		currentOperatorDefinition.addSource(returnExpression.toString());
+		compileChild(node, 2, null);
 		endOperatorDefinition();
 		return data;
 	}
@@ -124,9 +143,7 @@ public class Parser implements RelangVisitor {
 		currentOperatorDefinition.addSource(compileChild(node, 2, data).toString());
 		// optional Child 3 - return expression
 		if (getChildCount(node) == 4) {
-			var returnExpression = (Value)compileChild(node, 3, null);
-			currentOperatorDefinition.setReturn(returnExpression);
-			currentOperatorDefinition.addSource(returnExpression.toString());
+			compileChild(node, 3, null);
 		}
 		endOperatorDefinition();
 		return data;
@@ -157,7 +174,10 @@ public class Parser implements RelangVisitor {
 	// Function return expression
 	public Object visit(ASTReturnExpression node, Object data) {
 		var returnExpression = (Value)compileChild(node, 0, data);
-		return new Value(returnExpression.getTypeName(), "return " + returnExpression + ";\n");
+		currentOperatorDefinition.setReturn(returnExpression);
+		var source = "return " + returnExpression + ";\n";
+		currentOperatorDefinition.addSource(source);
+		return null;
 	}
 	
 	// Function invocation argument list. Return as Vector<String> of argument expression source text.

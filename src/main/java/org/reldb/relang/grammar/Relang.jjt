@@ -401,6 +401,28 @@ void primary_expression() :
     | "(" expression() ")"
 }
 
+void lambda() :
+{}
+{
+    LOOKAHEAD(fndefPure()) lambdaPure()
+  | lambdaImpure()
+}
+
+void lambdaPure() #LambdaPure :
+{}
+{
+   LOOKAHEAD(parmlist()) parmlist() <FNDEF> returnexpr()
+}
+
+void lambdaImpure() #LambdaImpure :
+{}
+{
+    LOOKAHEAD(parmlist()) parmlist() <FNDEF> "{"
+        fnbody()
+        [ <RETURN> returnexpr() ]
+    "}"
+}
+
 void fn_invoke() #FnInvoke :
 {}
 {

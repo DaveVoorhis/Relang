@@ -3,6 +3,8 @@ package org.reldb.relang;
 import org.junit.jupiter.api.Test;
 import org.reldb.relang.helper.LanguageTests;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
 class FnTests extends LanguageTests {
     @Test
     void simpleProcedureWithReturn() throws Exception {
@@ -127,5 +129,19 @@ class FnTests extends LanguageTests {
                 """;
 
         execute(source);
+    }
+
+    @Test
+    void simpleLambda() throws Exception {
+        var source = """
+                p = () -> 3
+                
+                return p()
+                """;
+
+        var result = evaluate(source);
+
+        assertThat(result).isInstanceOf(Long.class);
+        assertThat(result.toString()).isEqualTo("5");
     }
 }

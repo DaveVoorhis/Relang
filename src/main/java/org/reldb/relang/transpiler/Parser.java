@@ -353,6 +353,16 @@ public class Parser implements RelangVisitor {
 		return unary(node, data, "-");
 	}
 
+	@Override
+	public Object visit(ASTLambdaPure node, Object data) {
+		return null;
+	}
+
+	@Override
+	public Object visit(ASTLambdaImpure node, Object data) {
+		return null;
+	}
+
 	private Value unary(SimpleNode node, Object data, String operator) {
 		var operand = (Value)compileChild(node, 0, data);
 		return new Value(operand.getTypeName(), operator + "(" + operand + ")");

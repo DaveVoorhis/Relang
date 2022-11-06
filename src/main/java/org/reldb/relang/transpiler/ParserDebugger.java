@@ -197,6 +197,16 @@ public class ParserDebugger implements RelangVisitor {
 		return dump(node, data);
 	}
 
+	@Override
+	public Object visit(ASTLambdaPure node, Object data) {
+		return dump(node, data);
+	}
+
+	@Override
+	public Object visit(ASTLambdaImpure node, Object data) {
+		return dump(node, data);
+	}
+
 	// Push integer literal to stack
 	public Object visit(ASTInteger node, Object data) {
 		return dump(node, data);

@@ -134,7 +134,7 @@ class FnTests extends LanguageTests {
     @Test
     void simpleLambda() throws Exception {
         var source = """
-                p = () -> 3
+                p = () -> {3}
                 
                 return p()
                 """;
